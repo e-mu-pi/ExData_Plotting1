@@ -22,24 +22,58 @@ data <- read.table("household_power_consumption.txt",
 data$DateTime <- strptime( paste(data$Date, data$Time), '%d/%m/%Y %H:%M:%S', tz = 'GMT')
 data <- data %>% select(-Date) %>% select(-Time)
 
+#copied from plot2.R to keep this file self-contained
+make_second_plot <- function(data) {
+  with(data, {
+    plot(DateTime,Global_active_power,
+                  ylab = "Global Active Power",
+                  xlab = "",
+                  pch = "")
+    lines(DateTime,Global_active_power)
+  })
+}
+
+#copied from plot3.R to keep this file self-contained
 make_third_plot <- function(data) {
   with(data, {
     plot(DateTime,Sub_metering_1,
-                  ylab = "Energy sub metering",
-                  xlab = "",
-                  pch = "")
+         ylab = "Energy sub metering",
+         xlab = "",
+         pch = "")
     lines(DateTime,Sub_metering_1, col = "black")
     lines(DateTime,Sub_metering_2, col = "red")
     lines(DateTime,Sub_metering_3, col = "blue")
   })
   legend("topright", lty = 1, col = c("black", "red", "blue"),
+         bty = "n",
          legend = c("Sub_metering_1","Sub_metering_2","Sub_metering_3"))
 }
-make_third_plot(data)
 
-save_third_png <- function(data){
-  png(file = "plot3.png")
+make_line_plot <- function(data, variable){
+  with(data, {
+    plot(DateTime,eval(variable),
+                  pch = "",
+                  xlab = "datetime",
+                  ylab = variable )
+    lines(DateTime,eval(variable))
+  })
+}
+
+
+
+make_fourth_plot <- function(data) {
+  par(mfrow = c(2,2))
+  make_second_plot(data)
+  make_line_plot(data, quote(Voltage))
   make_third_plot(data)
+  make_line_plot(data, quote(Global_reactive_power))
+  par(mfrow = c(1,1))
+}
+make_fourth_plot(data)
+
+save_fourth_png <- function(data){
+  png(file = "plot4.png")
+  make_fourth_plot(data)
   dev.off()
 }
-save_third_png(data)
+save_fourth_png(data)
